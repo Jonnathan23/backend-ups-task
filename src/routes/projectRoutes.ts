@@ -8,10 +8,12 @@ import { taskBelongsToProject, taskExists } from "../middleware/task";
 
 const router = Router();
 
+router.param('projectId',projectExists)
 
 router.get('/', ProjectController.getAllProjects)
-router.get('/:id',
-    param('id').isMongoId().withMessage('El id no es válido'),
+
+router.get('/:projectId',
+    param('projectId').isMongoId().withMessage('El id no es válido'),
     handleInputErrors,
     ProjectController.getProjectById
 )
@@ -24,8 +26,8 @@ router.post('/',
     ProjectController.createProject
 )
 
-router.put('/:id',
-    param('id').isMongoId().withMessage('El id no es válido'),
+router.put('/:projectId',
+    param('projectId').isMongoId().withMessage('El id no es válido'),
     body('projectName').notEmpty().withMessage('El nombre del proyecto es obligatorio'),
     body('clientName').notEmpty().withMessage('El nombre del cliente es obligatorio'),
     body('description').notEmpty().withMessage('La descripción del proyecto es obligatoria'),
@@ -33,15 +35,15 @@ router.put('/:id',
     ProjectController.updateProject
 )
 
-router.delete('/:id',
-    param('id').isMongoId().withMessage('El id no es válido'),
+router.delete('/:projectId',
+    param('projectId').isMongoId().withMessage('El id no es válido'),
     handleInputErrors,
     ProjectController.deleteProject
 )
 
 
 /* Routes for task */
-router.param('projectId',projectExists)
+
 
 router.post('/:projectId/tasks'   ,
     body('name').notEmpty().withMessage('El nombre de la tarea es obligatorio'),
