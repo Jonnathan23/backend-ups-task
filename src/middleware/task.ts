@@ -16,7 +16,7 @@ export async function taskExists(req: Request, res: Response, next: NextFunction
 
         if (!task) {
             const error = new Error('Tarea no encontrada')
-            res.status(404).json({ msg: error.message })
+            res.status(404).json({ error: error.message })
             return
         }
 

@@ -12,7 +12,7 @@ declare global {
 export async function projectExists(req: Request, res: Response, next: NextFunction) {
     try {
         const { projectId } = req.params
-        const project = await Project.findById(projectId)
+        const project = await Project.findById(projectId).populate('tasks')
 
         if (!project) {
             const error = new Error('Proyecto no encontrado')

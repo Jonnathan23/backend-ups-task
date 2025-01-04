@@ -1,14 +1,12 @@
 import type { Request, Response } from "express";
 
 import Task from "../models/Task";
+import { stripColors } from "colors";
 
 export class TaskController {
     static getProjectTasks = async (req: Request, res: Response) => {
         try {
-            const tasks = await Task.find({ project: req.project.id }, '-createdAt -updatedAt').populate({
-                path: 'project',
-                select: '-createdAt -updatedAt' // Excluir campos en la proyección de populate
-            });
+            const tasks = await Task.find({ project: req.project.id }).populate({ path: 'project' });
 
             res.json(tasks)
         } catch (error) {
@@ -18,7 +16,7 @@ export class TaskController {
 
     static getTaskById = async (req: Request, res: Response) => {
         try {
-            
+
 
             res.json(req.task)
 
@@ -42,7 +40,7 @@ export class TaskController {
     }
 
     static updateTask = async (req: Request, res: Response) => {
-        try {   
+        try {
 
             req.task.name = req.body.name
             req.task.description = req.body.description
@@ -51,7 +49,8 @@ export class TaskController {
             res.send('Tarea actualizada correctamente')
 
         } catch (error) {
-            res.status(500).json({ error: 'Hubo un error' })
+            console.log(stripColors.bgRed(error))
+            res.status(500).json({ error: error })
         }
     }
 

@@ -15,7 +15,8 @@ export class ProjectController {
 
     static getProjectById = async (req: Request, res: Response) => {
         try {
-            res.send(req.project)
+            const project = req.project
+            res.send(project)
         } catch (error) {
             console.log(error)
             res.status(500).json({ error: 'Hubo un error' })
@@ -36,9 +37,12 @@ export class ProjectController {
         }
     }
 
-    static updateProject = async (req: Request, res: Response) => {        
-        try {  
+    static updateProject = async (req: Request, res: Response) => {
+        try {
             req.project.clientName = req.body.clientName
+            req.project.projectName = req.body.projectName
+            req.project.description = req.body.description
+
             await req.project.save()
             res.send('Proyecto actualizado correctamente')
 
@@ -49,7 +53,7 @@ export class ProjectController {
     }
 
     static deleteProject = async (req: Request, res: Response) => {
-        try {            
+        try {
             await req.project.deleteOne()
             res.send('Proyecto eliminado correctamente')
         } catch (error) {
