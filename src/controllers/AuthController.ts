@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import User from "../models/Auth";
-import { hashPassword } from "../utils/auth";
+import { checkPassword, hashPassword } from "../utils/auth";
 import Token from "../models/Token";
 import { generateToken } from "../utils/token";
 import colors from "colors";
@@ -42,7 +42,7 @@ export class AuthController {
             const tokenExists = await Token.findOne({ token })
 
             if (!tokenExists) {
-                res.status(401).json({ error: 'Token no encontrado' })
+                res.status(404).json({ error: 'Token no encontrado' })
                 return
             }
 
@@ -51,6 +51,46 @@ export class AuthController {
 
             await Promise.allSettled([user.save(), tokenExists.deleteOne()])
             res.send('Cuenta confirmada correctamente')
+            
+        } catch (error) {
+            console.log('\n')
+            console.log(colors.red(error))
+            res.status(500).json({ error: error })
+        }
+    }
+
+    static login = async (req: Request, res: Response) => { 
+        try {
+            const { email, password } = req.body            
+            const user = await User.findOne({ email })
+
+            if (!user) {
+                res.status(404).json({ error: 'Usuario no encontrado' })
+                return
+            }
+
+            if(!user.confirmed) {
+                const token = new Token({ token: generateToken(), user: user._id });
+                await token.save();
+
+                AuthEmail.sendConfirmationEmail({ email: user.email, name: user.name, token: token.token })
+
+                const error = new Error('La Cuenta no está confirmada, hemos enviado un correo para confirmarla')
+
+                res.status(401).json({ error: error.message })
+                return
+            }
+
+            // Revisar Password
+            const correctPassword = await checkPassword(password, user.password)
+
+            if(!correctPassword) {
+                res.status(401).json({ error: 'Contraseña incorrecta' })
+                return
+            }
+
+            res.send('Usuario logueado correctamente')
+
         } catch (error) {
             console.log('\n')
             console.log(colors.red(error))
