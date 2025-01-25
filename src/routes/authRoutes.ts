@@ -36,4 +36,16 @@ router.post('/login',
     AuthController.login
 )
 
+router.post('/request-code',
+    body('email').isEmail().withMessage('El email no es válido'),    
+    handleInputErrors,
+    AuthController.requestConfirmationCode
+)
+
+router.post('/forgot-password',
+    body('email').isEmail().withMessage('El email no es válido'),    
+    handleInputErrors,
+    AuthController.forgotPassword
+)
+
 export default router

@@ -51,7 +51,7 @@ export class AuthController {
 
             await Promise.allSettled([user.save(), tokenExists.deleteOne()])
             res.send('Cuenta confirmada correctamente')
-            
+
         } catch (error) {
             console.log('\n')
             console.log(colors.red(error))
@@ -59,9 +59,9 @@ export class AuthController {
         }
     }
 
-    static login = async (req: Request, res: Response) => { 
+    static login = async (req: Request, res: Response) => {
         try {
-            const { email, password } = req.body            
+            const { email, password } = req.body
             const user = await User.findOne({ email })
 
             if (!user) {
@@ -69,7 +69,7 @@ export class AuthController {
                 return
             }
 
-            if(!user.confirmed) {
+            if (!user.confirmed) {
                 const token = new Token({ token: generateToken(), user: user._id });
                 await token.save();
 
@@ -84,13 +84,70 @@ export class AuthController {
             // Revisar Password
             const correctPassword = await checkPassword(password, user.password)
 
-            if(!correctPassword) {
+            if (!correctPassword) {
                 res.status(401).json({ error: 'Contraseña incorrecta' })
                 return
             }
 
             res.send('Usuario logueado correctamente')
 
+        } catch (error) {
+            console.log('\n')
+            console.log(colors.red(error))
+            res.status(500).json({ error: error })
+        }
+    }
+
+
+    static requestConfirmationCode = async (req: Request, res: Response) => {
+        try {
+            const { email } = req.body                        
+            const userExists = await User.findOne({ email })
+            
+            if (!userExists) {
+                res.status(404).json({ error: 'El usuario no está registrado' })
+                return
+            }
+
+            if (userExists.confirmed) {
+                res.status(403).json({ error: 'El usuario ya está confirmado' })
+                return
+            }
+
+            //Generar token            
+            const token = new Token({ token: generateToken(), user: userExists._id });
+            await token.save()
+            AuthEmail.sendConfirmationEmail({ email: userExists.email, name: userExists.name, token: token.token })
+
+            res.send('Se envió un nuevo token a tu e-mail')
+        } catch (error) {
+            console.log('\n')
+            console.log(colors.red(error))
+            res.status(500).json({ error: error })
+        }
+    }
+
+    static forgotPassword = async (req: Request, res: Response) => {
+        try {
+            const { email } = req.body                       
+            const userExists = await User.findOne({ email })            
+
+            if (!userExists) {
+                res.status(404).json({ error: 'El usuario no está registrado' })
+                return
+            }
+
+            if (!userExists.confirmed) {
+                res.status(403).json({ error: 'El usuario no está confirmado' })
+                return
+            }
+
+            //Generar token            
+            const token = new Token({ token: generateToken(), user: userExists._id });
+            await token.save()
+            AuthEmail.sendPasswordResetToken({ email: userExists.email, name: userExists.name, token: token.token })
+
+            res.send('Revisa tu e-mail para la recuperación de tu contraseña')
         } catch (error) {
             console.log('\n')
             console.log(colors.red(error))
