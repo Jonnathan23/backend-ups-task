@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/Auth";
 import { checkPassword, hashPassword } from "../utils/auth";
-import Token from "../models/Token";
+import Token from "../models/Token.model";
 import { generateToken } from "../utils/token";
 import colors from "colors";
 import { AuthEmail } from "../emails/AuthEmail";
@@ -35,6 +35,7 @@ export class AuthController {
             res.status(500).json({ error: error })
         }
     }
+  
 
     static confirmAccount = async (req: Request, res: Response) => {
         try {

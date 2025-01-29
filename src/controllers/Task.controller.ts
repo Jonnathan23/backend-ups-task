@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 
-import Task from "../models/Task";
+import Task from "../models/Task.model";
 import { stripColors } from "colors";
 
 export class TaskController {

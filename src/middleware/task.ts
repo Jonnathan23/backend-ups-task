@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import Task, { ITask } from "../models/Task";
+import Task, { ITask } from "../models/Task.model";
 
 declare global {
     namespace Express {
