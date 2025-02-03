@@ -54,6 +54,7 @@ export class ProjectController {
 
     static deleteProject = async (req: Request, res: Response) => {
         try {
+            //TODO: Borrar tareas
             await req.project.deleteOne()
             res.send('Proyecto eliminado correctamente')
         } catch (error) {

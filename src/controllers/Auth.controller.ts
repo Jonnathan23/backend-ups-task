@@ -35,7 +35,7 @@ export class AuthController {
             res.status(500).json({ error: error })
         }
     }
-  
+
 
     static confirmAccount = async (req: Request, res: Response) => {
         try {
@@ -43,7 +43,7 @@ export class AuthController {
             const tokenExists = await Token.findOne({ token })
 
             if (!tokenExists) {
-                res.status(404).json({ error: 'Token no encontrado' })
+                res.status(404).json({ error: 'Token no valido' })
                 return
             }
 
@@ -102,9 +102,9 @@ export class AuthController {
 
     static requestConfirmationCode = async (req: Request, res: Response) => {
         try {
-            const { email } = req.body                        
+            const { email } = req.body
             const userExists = await User.findOne({ email })
-            
+
             if (!userExists) {
                 res.status(404).json({ error: 'El usuario no está registrado' })
                 return
@@ -130,8 +130,8 @@ export class AuthController {
 
     static forgotPassword = async (req: Request, res: Response) => {
         try {
-            const { email } = req.body                       
-            const userExists = await User.findOne({ email })            
+            const { email } = req.body
+            const userExists = await User.findOne({ email })
 
             if (!userExists) {
                 res.status(404).json({ error: 'El usuario no está registrado' })
@@ -155,4 +155,50 @@ export class AuthController {
             res.status(500).json({ error: error })
         }
     }
+
+    static validateToken = async (req: Request, res: Response) => {
+        try {
+            const { token } = req.body
+            const tokenExists = await Token.findOne({ token })
+
+            if (!tokenExists) {
+                res.status(404).json({ error: 'Token no valido' })
+                return
+            }
+
+            res.send('Define tu nuevo password')
+
+        } catch (error) {
+            console.log('\n')
+            console.log(colors.red(error))
+            res.status(500).json({ error: error })
+        }
+    }
+
+    static updatePasswordWithToken = async (req: Request, res: Response) => {
+        try {
+            const { token } = req.params
+            const { password } = req.body
+
+            const tokenExists = await Token.findOne({ token })
+            if (!tokenExists) {
+                res.status(404).json({ error: 'Token no valido' })
+                return
+            }
+
+            const user = await User.findById(tokenExists.user)
+            user.password = await hashPassword(password)
+
+            await Promise.allSettled([user.save(), tokenExists.deleteOne()])
+            
+            res.send('Contraseña actualizada correctamente')
+        } catch (error) {
+            console.log('\n')
+            console.log(colors.red(error))
+            res.status(500).json({ error: error })
+        }
+    }
+
+
+
 }

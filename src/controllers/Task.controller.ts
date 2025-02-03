@@ -16,10 +16,7 @@ export class TaskController {
 
     static getTaskById = async (req: Request, res: Response) => {
         try {
-
-
             res.json(req.task)
-
         } catch (error) {
             res.status(500).json({ error: 'Hubo un error' })
         }
