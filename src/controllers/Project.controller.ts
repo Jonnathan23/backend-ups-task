@@ -5,7 +5,11 @@ export class ProjectController {
 
     static getAllProjects = async (req: Request, res: Response) => {
         try {
-            const projects = await Project.find({}, '-createdAt -updatedAt')
+            const projects = await Project.find({
+                $or: [
+                    { manager: { $in: req.user.id } },
+                ]
+            }, '-createdAt -updatedAt')
             res.send(projects)
         } catch (error) {
             console.log(error)
@@ -16,6 +20,11 @@ export class ProjectController {
     static getProjectById = async (req: Request, res: Response) => {
         try {
             const project = req.project
+            if (project.manager.toString() !== req.user.id.toString()) {
+                res.status(404).json({ error: 'Acción no válida' })
+                return
+            }
+
             res.send(project)
         } catch (error) {
             console.log(error)
@@ -24,11 +33,11 @@ export class ProjectController {
 
     }
 
-    static createProject = async (req: Request, res: Response) => {
-
-        const project = new Project(req.body)
-
+    static createProject = async (req: Request, res: Response) => {        
         try {
+            const project = new Project(req.body)
+            project.manager = req.user.id
+
             await project.save()
             res.send('Proyecto creado correctamente')
         } catch (error) {
@@ -39,11 +48,18 @@ export class ProjectController {
 
     static updateProject = async (req: Request, res: Response) => {
         try {
-            req.project.clientName = req.body.clientName
-            req.project.projectName = req.body.projectName
-            req.project.description = req.body.description
+            const project = req.project
+            if (project.manager.toString() !== req.user.id.toString()) {
+                res.status(404).json({ error: 'Solo el manager puede actualizar el proyecto' })
+                return
+            }
 
-            await req.project.save()
+
+            project.clientName = req.body.clientName
+            project.projectName = req.body.projectName
+            project.description = req.body.description
+
+            await project.save()
             res.send('Proyecto actualizado correctamente')
 
         } catch (error) {
@@ -54,8 +70,14 @@ export class ProjectController {
 
     static deleteProject = async (req: Request, res: Response) => {
         try {
+            const project = req.project
+            if (project.manager.toString() !== req.user.id.toString()) {
+                res.status(404).json({ error: 'Solo el manager puede eliminar el proyecto' })
+                return
+            }
+
             //TODO: Borrar tareas
-            await req.project.deleteOne()
+            await project.deleteOne()
             res.send('Proyecto eliminado correctamente')
         } catch (error) {
             console.log(error)

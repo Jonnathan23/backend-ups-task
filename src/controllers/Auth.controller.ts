@@ -5,6 +5,8 @@ import Token from "../models/Token.model";
 import { generateToken } from "../utils/token";
 import colors from "colors";
 import { AuthEmail } from "../emails/AuthEmail";
+import { generateJWT } from "../utils/jwt";
+import { Types } from "mongoose";
 
 export class AuthController {
 
@@ -90,8 +92,9 @@ export class AuthController {
                 return
             }
 
-            res.send('Usuario logueado correctamente')
+            const jwt = generateJWT({id: user.id})
 
+            res.send(jwt)
         } catch (error) {
             console.log('\n')
             console.log(colors.red(error))
@@ -190,7 +193,7 @@ export class AuthController {
             user.password = await hashPassword(password)
 
             await Promise.allSettled([user.save(), tokenExists.deleteOne()])
-            
+
             res.send('Contraseña actualizada correctamente')
         } catch (error) {
             console.log('\n')
