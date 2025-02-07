@@ -28,6 +28,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
             const user = await User.findById(decoded.id).select('_id email name')
             if(user){
                 req.user = user
+                //next()
             } else {
                 res.status(500).json({ error: 'Token no valido' })                
             }
