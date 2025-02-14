@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, PopulatedDoc, Types } from "mongoose";
 import { ITask } from "./Task.model";
-import { IUser } from "./Auth";
+import { IUser } from "./User.model";
 
 // Type Project
 export interface IProject extends Document {

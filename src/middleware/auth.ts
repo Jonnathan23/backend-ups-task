@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken'
-import User, { IUser } from "../models/Auth";
+import User, { IUser } from "../models/User.model";
 
 declare global {
     namespace Express {
@@ -26,11 +26,11 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 
         if (typeof decoded === 'object' && decoded.id) {
             const user = await User.findById(decoded.id).select('_id email name')
-            if(user){
+            if (user) {
                 req.user = user
                 //next()
             } else {
-                res.status(500).json({ error: 'Token no valido' })                
+                res.status(500).json({ error: 'Token no valido' })
             }
         }
     } catch (error) {

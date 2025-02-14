@@ -72,6 +72,7 @@ router.post('/update-password/:token',
 
 router.get('/user',
     authenticate,
+    handleInputErrors,
     AuthController.user
 )
 

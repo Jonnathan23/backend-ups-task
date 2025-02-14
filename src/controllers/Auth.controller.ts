@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import User from "../models/Auth";
+import User from "../models/User.model";
 import { checkPassword, hashPassword } from "../utils/auth";
 import Token from "../models/Token.model";
 import { generateToken } from "../utils/token";
@@ -92,7 +92,7 @@ export class AuthController {
                 return
             }
 
-            const jwt = generateJWT({id: user.id})
+            const jwt = generateJWT({ id: user.id })
 
             res.send(jwt)
         } catch (error) {
@@ -203,6 +203,7 @@ export class AuthController {
     }
 
     static user = async (req: Request, res: Response) => {
+        
         res.json(req.user)
     }
 }
