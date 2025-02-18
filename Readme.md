@@ -27,6 +27,7 @@ Para hacer uso del JWT es necesario crear una ``llave privada`` en las varialbes
 
 # Docker
 
+```ts
 # 🏗️ Etapa 1: Construcción con Node.js
 FROM node:20 AS build
 
@@ -59,3 +60,4 @@ EXPOSE 3000
 
 # Comando para ejecutar el servidor
 CMD ["node", "server.js"]
+```
