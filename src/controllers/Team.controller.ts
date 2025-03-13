@@ -1,7 +1,21 @@
 import { Request, Response } from "express"
 import User from "../models/User.model"
+import Project from "../models/Project.model"
 
 export class TeamMemberController {
+
+    static getProjectTeam = async (req: Request, res: Response) => {
+        try {
+            const project = await (await Project.findById(req.project.id)).populate({
+                path: 'team',
+                select: 'id name email'
+            })
+            res.json(project.team)
+        } catch(error) {
+            res.status(500).json({ errors: error })
+        }
+    }
+
     static findMemberByEmail = async (req: Request, res: Response) => {
         try {
             const { email } = req.body
@@ -37,6 +51,23 @@ export class TeamMemberController {
 
             res.send('Usuario añadido al equipo con exito')
         } catch (error) {
+            res.status(500).json({ errors: error })
+        }
+    }
+
+    static removeMemberById = async (req: Request, res: Response) => {
+        try {
+            const { userId } = req.params
+
+            if(!req.project.team.some(team => team.toString() === userId)) {
+                res.status(409).json({ error: 'El usuario no existe en el proyecto' })
+                return
+            }
+
+            req.project.team = req.project.team.filter(teamMember => teamMember.toString() !== userId)
+            await req.project.save()
+            res.send('Usuario eliminado del equipo con exito')
+        } catch(error) {
             res.status(500).json({ errors: error })
         }
     }
