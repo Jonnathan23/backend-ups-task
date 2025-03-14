@@ -8,6 +8,7 @@ export class ProjectController {
             const projects = await Project.find({
                 $or: [
                     { manager: { $in: req.user.id } },
+                    { team: { $in: req.user.id } }
                 ]
             }, '-createdAt -updatedAt')
             res.send(projects)
@@ -20,7 +21,7 @@ export class ProjectController {
     static getProjectById = async (req: Request, res: Response) => {
         try {
             const project = req.project
-            if (project.manager.toString() !== req.user.id.toString()) {
+            if (project.manager.toString() !== req.user.id.toString() && !project.team.includes(req.user.id)) {
                 res.status(404).json({ error: 'Acción no válida' })
                 return
             }
@@ -33,7 +34,7 @@ export class ProjectController {
 
     }
 
-    static createProject = async (req: Request, res: Response) => {        
+    static createProject = async (req: Request, res: Response) => {
         try {
             const project = new Project(req.body)
             project.manager = req.user.id

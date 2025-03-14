@@ -56,7 +56,7 @@ export class TeamMemberController {
     }
 
     static removeMemberById = async (req: Request, res: Response) => {
-        try {
+        try {   
             const { userId } = req.params
 
             if(!req.project.team.some(team => team.toString() === userId)) {
