@@ -16,9 +16,13 @@ export class TaskController {
 
     static getTaskById = async (req: Request, res: Response) => {
         try {
-            res.json(req.task)
+            const task = await Task.findById(req.task.id)
+                .populate({ path: 'completedBy', select: '_id name' })
+                .populate({ path: 'notes', populate: { path: 'createdBy', select: '_id name' } })
+            res.status(200).json(task)
         } catch (error) {
-            res.status(500).json({ error: 'Hubo un error' })
+            console.log(error)
+            res.status(500).json({ error: error })
         }
     }
 
@@ -67,8 +71,8 @@ export class TaskController {
     static updateTaskStatus = async (req: Request, res: Response) => {
         try {
             const { status } = req.body
-
             req.task.status = status
+            req.task.completedBy = status === 'pending' ? null : req.user.id
             await req.task.save()
             res.send('Tarea actualizada correctamente')
 

@@ -7,6 +7,7 @@ import { projectExists } from "../middleware/project";
 import { hasAutorization, taskBelongsToProject, taskExists } from "../middleware/task";
 import { authenticate } from "../middleware/auth";
 import { TeamMemberController } from "../controllers/Team.controller";
+import { NoteController } from "../controllers/Note.controller";
 
 const router = Router();
 router.use(authenticate)
@@ -48,7 +49,7 @@ router.delete('/:projectId',
 )
 
 
-/* Routes for task */
+// |-----| | Routes for task | |-----|
 
 
 router.post('/:projectId/tasks',
@@ -97,7 +98,7 @@ router.post('/:projectId/tasks/:taskId/status',
     TaskController.updateTaskStatus
 )
 
-//* |-----| | Routes for team | |-----| 
+// |-----| | Routes for team | |-----| 
 router.post('/:projectId/team/find',
     body('email').isEmail().toLowerCase().withMessage('El email no es válido'),
     handleInputErrors,
@@ -106,20 +107,35 @@ router.post('/:projectId/team/find',
 
 router.get('/:projectId/team',
     handleInputErrors,
-    TeamMemberController.getProjectTeam    
+    TeamMemberController.getProjectTeam
 )
 
 
-router.post('/:projectId/team',    
+router.post('/:projectId/team',
     body('id').isMongoId().withMessage('El id no es válido'),
     handleInputErrors,
     TeamMemberController.addMemberById
 )
 
 router.delete('/:projectId/team/:userId',
-    param('userId').isMongoId().withMessage('El id no es válido'),    
+    param('userId').isMongoId().withMessage('El id no es válido'),
     handleInputErrors,
     TeamMemberController.removeMemberById
+)
+
+// |-----| | Routes for Notes | |-----|
+router.post('/notes/:projectId/tasks/:taskId/notes',
+    body('content').notEmpty().withMessage('El contenido de la nota es obligatorio'),
+    handleInputErrors,
+    NoteController.createNote
+)
+
+router.get('/notes/:projectId/tasks/:taskId/notes', NoteController.getTaskNotes)
+
+router.delete('/notes/:projectId/tasks/:taskId/notes/:noteId',
+    param('noteId').isMongoId().withMessage('El id no es válido'),
+    handleInputErrors,
+    NoteController.deleteNote
 )
 
 export default router
